@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.env
+.env.*
+.venv/
+data/*
+!.gitkeep
+.vscode/
+.DS_Store
+.ipynb_checkpoints
+BTCUSDT_1m.csv 
