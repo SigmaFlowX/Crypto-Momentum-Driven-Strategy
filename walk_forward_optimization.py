@@ -61,7 +61,7 @@ def backtest_numba(price_arr, ema_arr, roc_arr, roc_std_arr, vol_arr, vol_ma_arr
 
             short_trailing_stop = short_price * (1 + trailing_pct / 100)
 
-        # выход из лонга
+
         if pos == 1:
             long_trailing_stop = max(long_trailing_stop, curr_price * (1 - trailing_pct / 100))
 
@@ -79,7 +79,7 @@ def backtest_numba(price_arr, ema_arr, roc_arr, roc_std_arr, vol_arr, vol_ma_arr
                 balance *= 1 + pnl * risk_percent / 100
                 pos = 0
 
-    # Обработка позиции на последнем баре
+
     if pos == 1:
         pnl = curr_price / long_price - 1 - 2 * fee / 100
         balance *= 1 + pnl * risk_percent / 100
@@ -99,7 +99,7 @@ def test(price_arr, ema_arr, roc_arr, roc_std_arr, vol_arr, vol_ma_arr, ema_std_
     win_count = 0
     pos = 0
 
-    equity_curve = [balance]  # баланс на каждом баре
+    equity_curve = [balance]
     long_entries, short_entries = [], []
     long_entry_prices, short_entry_prices = [], []
     exit_points, exit_prices = [], []
@@ -140,7 +140,6 @@ def test(price_arr, ema_arr, roc_arr, roc_std_arr, vol_arr, vol_ma_arr, ema_std_
             long_entries.append(i)
             long_entry_prices.append(curr_price)
 
-        # === ВХОД В ШОРТ ===
         elif short_cond:
             short_price = curr_price
             pos = -1
@@ -148,7 +147,6 @@ def test(price_arr, ema_arr, roc_arr, roc_std_arr, vol_arr, vol_ma_arr, ema_std_
             short_entries.append(i)
             short_entry_prices.append(curr_price)
 
-        # === ВЫХОД ИЗ ЛОНГА ===
         if pos == 1:
             long_trailing_stop = max(long_trailing_stop, curr_price * (1 - trailing_pct / 100))
             if curr_price < curr_ema or curr_price < long_trailing_stop:
@@ -163,7 +161,6 @@ def test(price_arr, ema_arr, roc_arr, roc_std_arr, vol_arr, vol_ma_arr, ema_std_
                 exit_points.append(i)
                 exit_prices.append(curr_price)
 
-        # === ВЫХОД ИЗ ШОРТА ===
         elif pos == -1:
             short_trailing_stop = min(short_trailing_stop, curr_price * (1 + trailing_pct / 100))
             if curr_price > curr_ema or curr_price > short_trailing_stop:
@@ -178,9 +175,8 @@ def test(price_arr, ema_arr, roc_arr, roc_std_arr, vol_arr, vol_ma_arr, ema_std_
                 exit_points.append(i)
                 exit_prices.append(curr_price)
 
-        equity_curve.append(balance)  # записываем баланс каждый шаг
+        equity_curve.append(balance)
 
-    # === Закрываем позицию в конце теста ===
     if pos == 1:
         pnl = curr_price / long_price - 1 - 2 * fee / 100
         balance *= 1 + pnl * risk_percent / 100
@@ -200,9 +196,7 @@ def test(price_arr, ema_arr, roc_arr, roc_std_arr, vol_arr, vol_ma_arr, ema_std_
         exit_points.append(n - 1)
         exit_prices.append(price_arr[-1])
 
-    equity_curve = np.array(equity_curve[:n])  # усечение до длины n
-    # === Коэффициент Шарпа (годовой, по кривой equity) ===
-    # считаем лог-доходности по equity, чтобы корректно работать с мультипликативными изменениями
+    equity_curve = np.array(equity_curve[:n])
     returns = np.diff(np.log(equity_curve))
 
     if len(returns) > 1 and np.std(returns) > 0:
@@ -213,13 +207,11 @@ def test(price_arr, ema_arr, roc_arr, roc_std_arr, vol_arr, vol_ma_arr, ema_std_
 
     win_ratio = win_count / trade_count if trade_count else 0
 
-    # === Визуализация ===
     if show_plots:
         time = np.arange(n) if timestamps is None else timestamps
 
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 8), sharex=True)
 
-        # --- График цены и EMA + входы/выходы ---
         ax1.plot(time, price_arr, label='Price', alpha=0.7)
         ax1.plot(time, ema_arr, label='EMA', color='orange', alpha=0.8)
         ax1.scatter(np.array(time)[long_entries], np.array(long_entry_prices),
@@ -232,7 +224,6 @@ def test(price_arr, ema_arr, roc_arr, roc_std_arr, vol_arr, vol_ma_arr, ema_std_
         ax1.legend(loc='upper left')
         ax1.grid(True)
 
-        # --- Equity curve ---
         ax2.plot(time, equity_curve, label='Equity Curve', color='blue', linewidth=2)
         ax2.set_ylabel('Equity')
         ax2.set_xlabel('Time')
@@ -358,7 +349,6 @@ for train_start, train_end, test_start, test_end in windows:
     print(f"Число сделок на тесте: {n_trades}")
     print(f"Процент выигрышных сделок на тесте: {win_ratio * 100}%")
 
-    # сохраняем результаты
     test_results.append({
         'train_start': train_start,
         'train_end': train_end,
