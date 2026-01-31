@@ -344,11 +344,11 @@ for train_start, train_end, test_start, test_end in windows:
         timestamps=test_df.index,
         show_plots=True
     )
-    print("Доходность на тсесте:", test_return*100, "%")
-    print(f"Годовая доходность на тесте:", ((1 + test_return) ** (1 / 0.25) - 1)*100, "%")
-    print(f"Коэффициент Шарпа на тесте: {sharpe}")
-    print(f"Число сделок на тесте: {n_trades}")
-    print(f"Процент выигрышных сделок на тесте: {win_ratio * 100}%")
+    print("Total test return:", test_return*100, "%")
+    print(f"Test annual return:", ((1 + test_return) ** (1 / 0.25) - 1)*100, "%")
+    print(f"Test sharpe: {sharpe}")
+    print(f"Test number of treades: {n_trades}")
+    print(f"Test win ratio: {win_ratio * 100}%")
 
     test_results.append({
         'train_start': train_start,
@@ -365,8 +365,6 @@ for train_start, train_end, test_start, test_end in windows:
 
 results_df = pd.DataFrame(test_results)
 results_df.to_csv("wolk_forward_optimization.csv")
-print("\nРезультаты Walk-Forward:")
+print("walk-forward results")
 print(results_df[['train_start', 'train_end', 'test_start', 'test_end', 'annualized test_return_%']])
-print(f"\nСредняя годовая доходность по всем тестам: {results_df['annualized test_return_%'].mean():.2f}%")
-
 
